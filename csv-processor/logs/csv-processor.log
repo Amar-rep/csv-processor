@@ -1,0 +1,79 @@
+2026-08-25T10:07:40.590+05:30  INFO 12120 --- [csv-processor] [restartedMain] c.example.learn.CsvProcessorApplication  : Starting CsvProcessorApplication using Java 21.0.12 with PID 12120 (C:\Users\caytm\git\repository\csv-processor\target\classes started by caytm in C:\Users\caytm\git\repository\csv-processor)
+2026-08-25T10:07:40.602+05:30 DEBUG 12120 --- [csv-processor] [restartedMain] c.example.learn.CsvProcessorApplication  : Running with Spring Boot v4.1.1, Spring v7.0.9
+2026-08-25T10:07:40.605+05:30  INFO 12120 --- [csv-processor] [restartedMain] c.example.learn.CsvProcessorApplication  : No active profile set, falling back to 1 default profile: "default"
+2026-08-25T10:07:40.709+05:30  INFO 12120 --- [csv-processor] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-08-25T10:07:40.710+05:30  INFO 12120 --- [csv-processor] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-08-25T10:07:42.083+05:30  INFO 12120 --- [csv-processor] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-25T10:07:42.314+05:30  INFO 12120 --- [csv-processor] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 217 ms. Found 4 JPA repository interfaces.
+2026-08-25T10:07:43.588+05:30  INFO 12120 --- [csv-processor] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8085 (http)
+2026-08-25T10:07:43.616+05:30  INFO 12120 --- [csv-processor] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-25T10:07:43.616+05:30  INFO 12120 --- [csv-processor] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-08-25T10:07:43.712+05:30  INFO 12120 --- [csv-processor] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 3000 ms
+2026-08-25T10:07:44.024+05:30  INFO 12120 --- [csv-processor] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-08-25T10:07:44.105+05:30  INFO 12120 --- [csv-processor] [restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.4.5.Final
+2026-08-25T10:07:44.704+05:30  INFO 12120 --- [csv-processor] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-25T10:07:44.752+05:30  INFO 12120 --- [csv-processor] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-25T10:07:44.953+05:30  INFO 12120 --- [csv-processor] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@50c0d5b
+2026-08-25T10:07:44.956+05:30  INFO 12120 --- [csv-processor] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-25T10:07:45.054+05:30  INFO 12120 --- [csv-processor] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/zipdb]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.4
+	Default catalog/schema: zipdb/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-25T10:07:46.349+05:30  INFO 12120 --- [csv-processor] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-25T10:07:46.357+05:30  INFO 12120 --- [csv-processor] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-25T10:07:46.520+05:30  INFO 12120 --- [csv-processor] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-25T10:07:47.327+05:30  WARN 12120 --- [csv-processor] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-25T10:07:47.363+05:30  INFO 12120 --- [csv-processor] [restartedMain] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page: class path resource [static/index.html]
+2026-08-25T10:07:47.850+05:30  INFO 12120 --- [csv-processor] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8085 (http) with context path '/'
+2026-08-25T10:07:47.858+05:30  INFO 12120 --- [csv-processor] [restartedMain] c.example.learn.CsvProcessorApplication  : Started CsvProcessorApplication in 7.861 seconds (process running for 8.987)
+2026-08-25T10:10:52.310+05:30  INFO 12120 --- [csv-processor] [http-nio-8085-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-25T10:10:52.311+05:30  INFO 12120 --- [csv-processor] [http-nio-8085-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-08-25T10:10:52.312+05:30  INFO 12120 --- [csv-processor] [http-nio-8085-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-08-25T10:10:58.453+05:30  INFO 12120 --- [csv-processor] [http-nio-8085-exec-2] c.e.learn.service.csvProcessingService   : Uploaded File: name=user_details_500.csv,type=text/csv, size=0.04863739013671875 mb
+2026-08-25T10:18:04.776+05:30  INFO 12120 --- [csv-processor] [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-08-25T10:18:04.784+05:30  INFO 12120 --- [csv-processor] [Thread-1] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-08-25T10:18:04.796+05:30  INFO 12120 --- [csv-processor] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-08-25T10:18:04.804+05:30  INFO 12120 --- [csv-processor] [Thread-1] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-25T10:18:04.817+05:30  INFO 12120 --- [csv-processor] [Thread-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-08-25T10:18:04.829+05:30  INFO 12120 --- [csv-processor] [Thread-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-08-25T10:18:05.026+05:30  INFO 12120 --- [csv-processor] [restartedMain] c.example.learn.CsvProcessorApplication  : Starting CsvProcessorApplication using Java 21.0.12 with PID 12120 (C:\Users\caytm\git\repository\csv-processor\target\classes started by caytm in C:\Users\caytm\git\repository\csv-processor)
+2026-08-25T10:18:05.027+05:30 DEBUG 12120 --- [csv-processor] [restartedMain] c.example.learn.CsvProcessorApplication  : Running with Spring Boot v4.1.1, Spring v7.0.9
+2026-08-25T10:18:05.030+05:30  INFO 12120 --- [csv-processor] [restartedMain] c.example.learn.CsvProcessorApplication  : No active profile set, falling back to 1 default profile: "default"
+2026-08-25T10:18:05.724+05:30  INFO 12120 --- [csv-processor] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-25T10:18:05.777+05:30  INFO 12120 --- [csv-processor] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 48 ms. Found 4 JPA repository interfaces.
+2026-08-25T10:18:06.011+05:30  INFO 12120 --- [csv-processor] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8085 (http)
+2026-08-25T10:18:06.013+05:30  INFO 12120 --- [csv-processor] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-25T10:18:06.014+05:30  INFO 12120 --- [csv-processor] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-08-25T10:18:06.052+05:30  INFO 12120 --- [csv-processor] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 995 ms
+2026-08-25T10:18:06.118+05:30  INFO 12120 --- [csv-processor] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-08-25T10:18:06.180+05:30  INFO 12120 --- [csv-processor] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-25T10:18:06.184+05:30  INFO 12120 --- [csv-processor] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-08-25T10:18:06.257+05:30  INFO 12120 --- [csv-processor] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection org.postgresql.jdbc.PgConnection@7169b319
+2026-08-25T10:18:06.258+05:30  INFO 12120 --- [csv-processor] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-08-25T10:18:06.276+05:30  INFO 12120 --- [csv-processor] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/zipdb]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.4
+	Default catalog/schema: zipdb/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-25T10:18:06.452+05:30  INFO 12120 --- [csv-processor] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-25T10:18:06.455+05:30  INFO 12120 --- [csv-processor] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-25T10:18:06.727+05:30  WARN 12120 --- [csv-processor] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-25T10:18:06.741+05:30  INFO 12120 --- [csv-processor] [restartedMain] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page: class path resource [static/index.html]
+2026-08-25T10:18:06.994+05:30  INFO 12120 --- [csv-processor] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8085 (http) with context path '/'
+2026-08-25T10:18:07.000+05:30  INFO 12120 --- [csv-processor] [restartedMain] c.example.learn.CsvProcessorApplication  : Started CsvProcessorApplication in 2.035 seconds (process running for 628.129)
+2026-08-25T10:18:07.004+05:30  INFO 12120 --- [csv-processor] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
