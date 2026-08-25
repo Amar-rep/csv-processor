@@ -23,7 +23,7 @@ public class CsvJobService {
         job.setCompletedAt(LocalDateTime.now());
         job.setFailedRecords(tracker.getFailedRows().get());
         job.setProcessedRecords(tracker.getProcessedRows().get());
-        job.setTotalRecords(tracker.getFailedRows().get() + tracker.getProcessedRows().get());
+        job.setCompletedAt(LocalDateTime.now());
         if (tracker.getSuccess().get()) {
             job.setStatus(jobStatus.COMPLETED);
         } else {

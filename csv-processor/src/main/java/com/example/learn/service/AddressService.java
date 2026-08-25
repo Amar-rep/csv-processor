@@ -2,7 +2,6 @@ package com.example.learn.service;
 
 import java.util.Optional;
 
-   
 import org.springframework.stereotype.Service;
 
 import com.example.learn.dto.ZipCodeResponse;
@@ -18,21 +17,18 @@ public class AddressService {
     private final AddressRepository addressRepository;
 
     @Transactional
-    public Address getOrCreateAddress(String zipCode,ZipCodeResponse zipCodeResponse){
-        Optional<Address> existingAddress=addressRepository.findByZipCode(zipCode);
+    public Address getOrCreateAddress(String zipCode, ZipCodeResponse zipCodeResponse) {
+        Optional<Address> existingAddress = addressRepository.findByZipCode(zipCode);
 
-        if(existingAddress.isPresent()){
+        if (existingAddress.isPresent()) {
             return existingAddress.get();
         }
 
-        Address address=new Address();
-        address.setZipCode(zipCode);
-        address.setCountry("US");
-        address.setCity(zipCodeResponse.getAreaName());
-        address.setState(zipCodeResponse.getPhysicalState());
+        addressRepository.upsertAddress(zipCode, "US", zipCodeResponse.getAreaName(),
+                zipCodeResponse.getPhysicalState());
 
-       
-        return addressRepository.save(address);
-      
+        return addressRepository.findByZipCode(zipCode)
+                .orElseThrow(() -> new IllegalStateException("Address Missing after insert"));
+
     }
 }

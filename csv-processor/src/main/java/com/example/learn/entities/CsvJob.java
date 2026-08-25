@@ -3,7 +3,6 @@ package com.example.learn.entities;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,25 +15,21 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name="csv_job")
+@Table(name = "csv_job")
 @Getter
 @Setter
 public class CsvJob {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name="file_name")
+    @Column(name = "file_name")
     private String fileName;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable=false)
+    @Column(nullable = false)
     private jobStatus status;
-    
-
-    @Column(name = "total_records")
-    private Integer totalRecords = 0;
 
     @Column(name = "processed_records")
     private Integer processedRecords = 0;
@@ -50,5 +45,5 @@ public class CsvJob {
 
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
-    
+
 }

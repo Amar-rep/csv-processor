@@ -78,12 +78,11 @@ public class csvProcessingService {
         List<Future<?>> consumerFutures = new ArrayList<>();
         csvJobService.updateStatus(job.getId(), jobStatus.PROCESSING);
 
-        Future<?> producerFuture = producerPool.submit(() -> produce(job, tempFile, queue, tracker, consumerFutures));
-
         for (int i = 0; i < CONSUMER_COUNT; i++) {
             Future<?> future = consumerPool.submit(() -> consumer(queue, tracker, job));
             consumerFutures.add(future);
         }
+        Future<?> producerFuture = producerPool.submit(() -> produce(job, tempFile, queue, tracker, consumerFutures));
 
         // Ending the process
         try {
@@ -91,11 +90,15 @@ public class csvProcessingService {
             for (Future<?> ft : consumerFutures) {
                 ft.get();
             }
-
+            System.out.println(LocalDateTime.now());
             csvJobService.updateJob(job, tracker);
+            deleteTempFile(tempFile);
 
         } catch (Exception e) {
-            // TODO: handle exception
+            log.error("CSV processsing failed for job {}", job.getId());
+            csvJobService.updateStatus(job.getId(), jobStatus.FAILED);
+        } finally {
+            deleteTempFile(tempFile);
         }
 
     }
@@ -117,9 +120,6 @@ public class csvProcessingService {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             handleProducerFailure(job, tracker, consumerFutures, "Producer Interrupted", e);
-        } finally {
-
-            deleteTempFile(tempFile);
         }
     }
 
@@ -132,22 +132,24 @@ public class csvProcessingService {
                     break;
                 }
 
-                tracker.getProcessedRows().incrementAndGet();
-
                 String userData[] = line.split(",");
 
                 String zipcode = userData[2];
                 List<ZipCodeResponse> responses = zipcodeService.getZipData(zipcode);
                 if (responses == null || responses.isEmpty()) {
-                    System.out.println("No zipcode data for: " + zipcode);
+                    tracker.getFailedRows().incrementAndGet();
+                    log.warn("ZIP data not found for: {}", zipcode);
                     continue;
                 }
 
-                ZipCodeResponse zipCodeResponse = responses.get(0);
-                userProcessingService.createUser(userData, zipCodeResponse, job);
-
+                userProcessingService.createUser(userData, responses.get(0), job);
+                tracker.getProcessedRows().incrementAndGet();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
             } catch (Exception e) {
-                // TODO: handle exception
+                tracker.getFailedRows().incrementAndGet();
+                log.error("Consumer failed for job {}", job.getId(), e);
             }
         }
     }
@@ -189,6 +191,9 @@ public class csvProcessingService {
 
     private void validateLine(String line) {
         String[] data = line.split(",");
+        if (data.length != 7) {
+            throw new CsvValidationException("Invalid col numbers");
+        }
         String email = data[5].trim();
         String firstName = data[0].trim();
         String lastName = data[1].trim();
@@ -199,35 +204,38 @@ public class csvProcessingService {
         if (firstName.isBlank()) {
             throw new CsvValidationException("First name is required");
         }
-
         if (lastName.isBlank()) {
             throw new CsvValidationException("Last name is required");
-        }
-
-        if (data.length != 7) {
-            throw new CsvValidationException("Invalid col numbers");
         }
         if (email == null || email.isBlank() || !Email_Validator.isValid(email)) {
             throw new CsvValidationException("Invalid Email");
         }
-
         if (url.isBlank() || !Url_Validator.isValid(url)) {
             throw new CsvValidationException("Invalid URL");
         }
         if (!phone1.matches("\\d{3}-\\d{3}-\\d{4}") || !phone2.matches("\\d{3}-\\d{3}-\\d{4}")) {
             throw new CsvValidationException("Invalid phone ");
         }
-        if (!zipCode.matches("\\d{5}")) {
-            throw new CsvValidationException("Invalid zipcode ");
-        }
+        /*
+         * if (!zipCode.matches("\\d{5}")) {
+         * throw new CsvValidationException("Invalid zipcode ");
+         * }
+         */
 
     }
 
     // ------- CLEAN UP HELPERS
 
     private void sendPoisonPill(BlockingQueue<String> queue) {
-        for (int i = 0; i < 20; i++) {
-            queue.add(POISON);
+        for (int i = 0; i < CONSUMER_COUNT; i++) {
+            try {
+                queue.put(POISON);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.warn("Interrupted while signaling CSV consumers to stop", e);
+                return;
+            }
+
         }
     }
 
@@ -251,6 +259,11 @@ public class csvProcessingService {
             ft.cancel(true);
         }
 
+    }
+
+    private class queueData {
+        String line;
+        int rowNumber;
     }
 
 }
