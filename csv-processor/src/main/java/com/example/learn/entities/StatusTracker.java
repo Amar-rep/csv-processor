@@ -12,7 +12,7 @@ public class StatusTracker {
     private final AtomicInteger totalRows = new AtomicInteger(0);
     private final AtomicInteger processedRows = new AtomicInteger(0);
     private final AtomicInteger failedRows = new AtomicInteger(0);
-
+    private final AtomicInteger succesfulRows = new AtomicInteger(0);
     private final AtomicBoolean success = new AtomicBoolean(true);
 
 }

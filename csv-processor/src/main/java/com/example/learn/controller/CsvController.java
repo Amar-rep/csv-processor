@@ -12,41 +12,50 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.learn.dto.ZipCodeResponse;
-import com.example.learn.entities.Users;
-import com.example.learn.repositories.UserRepository;
-import com.example.learn.service.ZipcodeService;
+import com.example.learn.dto.CsvJobResponse;
+import com.example.learn.dto.FailedRecordResponse;
+import com.example.learn.dto.UserResultResponse;
+import com.example.learn.service.CsvJobService;
+import com.example.learn.service.FailedRecordService;
+import com.example.learn.service.UserProcessingService;
 import com.example.learn.service.csvProcessingService;
 
+import org.springframework.http.MediaType;
 import lombok.RequiredArgsConstructor;
 
-
-
-
 @RestController
-@RequestMapping("/csv")
+@RequestMapping("/api/jobs")
 @RequiredArgsConstructor
-
 public class CsvController {
-    public final csvProcessingService csvProcessingService;
-    public final UserRepository userRepository;
-    private final ZipcodeService zipcodeService;
-    @PostMapping("api/jobs")
-    public UUID uploadCsvFile(@RequestParam("file") MultipartFile file) {
-        
-        return csvProcessingService.launchCsvProcessing(file);
+
+    private final csvProcessingService csvProcessingService;
+    private final CsvJobService csvJobService;
+    private final UserProcessingService userProcessingService;
+    private final FailedRecordService failedRecordService;
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UUID> createJob(
+            @RequestParam("file") MultipartFile file) {
+        UUID jobId = csvProcessingService.launchCsvProcessing(file);
+        return ResponseEntity.accepted()
+                .body(jobId);
     }
 
-    @GetMapping("api/jobs/{jobId}")
-    public ResponseEntity<List<Users>> getMethodName(@PathVariable UUID jobId) {
-        return ResponseEntity.ok(userRepository.findByJobId(jobId));
+    @GetMapping("/{jobId}")
+    public CsvJobResponse getJob(@PathVariable UUID jobId) {
+        return CsvJobResponse.from(csvJobService.findByJobId(jobId));
     }
 
-    @GetMapping("api/zipData/{zipcode}")
-    public ResponseEntity<ZipCodeResponse> getZipData(@PathVariable String zipcode) {
-        return ResponseEntity.ok(zipcodeService.getZipData(zipcode).get(0));
-    }
-    
+    @GetMapping("/{jobId}/results")
+    public ResponseEntity<List<UserResultResponse>> getResults(@PathVariable UUID jobId) {
 
-    
+        return ResponseEntity.ok(userProcessingService.findUsersByJobId(jobId));
+    }
+
+    @GetMapping("/{jobId}/failures")
+    public ResponseEntity<List<FailedRecordResponse>> getFailures(@PathVariable UUID jobId) {
+
+        return ResponseEntity.ok(failedRecordService.findByJobId(jobId));
+    }
+
 }

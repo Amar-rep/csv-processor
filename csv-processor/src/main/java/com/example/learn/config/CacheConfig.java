@@ -14,15 +14,16 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 @Configuration
 @EnableCaching
 public class CacheConfig {
-    
+
     @Value("${cache.zipcode.maximum-size}")
     private long maximumSize;
 
-   
-
     @Bean
-    public CacheManager CacheManager(){
-        CaffeineCacheManager cacheManager=new CaffeineCacheManager("zipcodes");
+    public CacheManager CacheManager() {
+
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager(
+                "zipcodes",
+                "zippopotamusZipcodes");
 
         cacheManager.setCaffeine(Caffeine.newBuilder().maximumSize(maximumSize).recordStats());
         return cacheManager;
