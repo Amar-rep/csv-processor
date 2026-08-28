@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class AddressService {
     private final AddressRepository addressRepository;
 
+    // for local zipdb server only
     @Transactional
     public Address getOrCreateAddress(String zipCode, ZipCodeResponse zipCodeResponse) {
         Optional<Address> existingAddress = addressRepository.findByZipCode(zipCode);

@@ -14,8 +14,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-import org.apache.commons.validator.routines.EmailValidator;
-import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -38,9 +36,7 @@ public class csvProcessingService {
     private final ZipcodeService zipcodeService;
     private final CsvJobService csvJobService;
     private final FailedRecordService failedRecordService;
-
-    private final EmailValidator Email_Validator = EmailValidator.getInstance();
-    private final UrlValidator Url_Validator = UrlValidator.getInstance();
+    private final CsvValidationService csvValidationService;
 
     private final ExecutorService consumerPool;
     private final ExecutorService producerPool;
@@ -54,6 +50,7 @@ public class csvProcessingService {
             ZipcodeService zipcodeService,
             CsvJobService csvJobService,
             FailedRecordService failedRecordService,
+            CsvValidationService csvValidationService,
 
             @Qualifier("csvConsumerExecutor") ExecutorService consumerPool,
 
@@ -65,6 +62,7 @@ public class csvProcessingService {
         this.zipcodeService = zipcodeService;
         this.csvJobService = csvJobService;
         this.failedRecordService = failedRecordService;
+        this.csvValidationService = csvValidationService;
 
         this.consumerPool = consumerPool;
         this.producerPool = producerPool;
@@ -75,16 +73,18 @@ public class csvProcessingService {
 
     // start job
     public UUID launchCsvProcessing(MultipartFile file) {
-
-        fileValidation(file);
-        CsvJob job = csvJobService.createJob(file);
-        UUID jobId = job.getId();
         Path tempFile = null;
+        UUID jobId = null;
         try {
+            csvValidationService.validateFile(file);
+            CsvJob job = csvJobService.createJob(file);
+            jobId = job.getId();
+
             tempFile = Files.createTempFile("csv-" + jobId + "--", ".csv");
             file.transferTo(tempFile);
+
             Path fileForProcesssing = tempFile;
-            // send for processing
+            // send for processing to Jobpool
             jobPool.submit(() -> processCsv(fileForProcesssing, job));
         } catch (IOException e) {
             deleteTempFile(tempFile);
@@ -108,7 +108,7 @@ public class csvProcessingService {
         }
         Future<?> producerFuture = producerPool.submit(() -> produce(job, tempFile, queue, tracker, consumerFutures));
 
-        // Ending the process
+        // Ending the process+cleanUP
         try {
             for (Future<?> ft : consumerFutures) {
                 ft.get();
@@ -138,7 +138,7 @@ public class csvProcessingService {
                     : e;
 
             log.error(
-                    "CSV processing failed for job {}",
+                    "CSV processing failed fo r job {}",
                     job.getId(),
                     cause.getMessage());
 
@@ -168,7 +168,7 @@ public class csvProcessingService {
             Thread.currentThread().interrupt();
             throw handleProducerFailure(job, tracker, consumerFutures, "Producer Interrupted", e);
         } catch (IOException e) {
-            throw handleProducerFailure(job, tracker, consumerFutures, "failed to read csv file", e);
+            throw handleProducerFailure(job, tracker, consumerFutures, "failed to read csv ", e);
         }
     }
 
@@ -182,7 +182,7 @@ public class csvProcessingService {
                     break;
                 }
 
-                validateLine(data.getLine());
+                csvValidationService.validateLine(data.getLine());
 
                 String userData[] = data.getLine().split(",");
 
@@ -207,63 +207,6 @@ public class csvProcessingService {
                 return;
             }
         }
-    }
-
-    // ----------- Validation Helpers
-
-    private void fileValidation(MultipartFile file) {
-        String fileName = file.getOriginalFilename();
-        String contentType = file.getContentType();
-        long size = file.getSize();
-
-        log.info("Uploaded File: name={},type={}, size={} mb", fileName, contentType, (double) size / (1024 * 1024));
-
-        if (file.isEmpty()) {
-            throw new FileProcessingException("uploaded File is empty");
-        }
-        if (size > 20L * 1024 * 1024) {
-            throw new FileProcessingException("File size exceed 20mb");
-
-        }
-        if (fileName == null || !fileName.toLowerCase().endsWith(".csv")) {
-            throw new FileProcessingException("Invalid File type");
-        }
-
-    }
-
-    private String validateLine(String line) {
-        String[] data = line.split(",");
-        if (data.length != 7) {
-            throw new CsvValidationException("Invalid col numbers");
-        }
-        String email = data[5].trim();
-        String firstName = data[0].trim();
-        String lastName = data[1].trim();
-        String zipCode = data[2].trim();
-        String phone1 = data[3].trim();
-        String phone2 = data[4].trim();
-        String url = data[6].trim();
-        if (firstName.isBlank()) {
-            throw new CsvValidationException("First name is required");
-        }
-        if (lastName.isBlank()) {
-            throw new CsvValidationException("Last name is required");
-        }
-        if (email == null || email.isBlank() || !Email_Validator.isValid(email)) {
-            throw new CsvValidationException("Invalid Email");
-        }
-        if (url.isBlank() || !Url_Validator.isValid(url)) {
-            throw new CsvValidationException("Invalid URL");
-        }
-        if (!phone1.matches("\\d{3}-\\d{3}-\\d{4}") || !phone2.matches("\\d{3}-\\d{3}-\\d{4}")) {
-            throw new CsvValidationException("Invalid phone ");
-        }
-        if (!zipCode.matches("\\d{4,5}")) {
-            throw new CsvValidationException("Invalid ZIP code");
-        }
-
-        return line;
-
     }
 
     // ------- CLEAN UP HELPERS

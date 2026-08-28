@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class ZipcodeService {
     private final WebClient webClient;
 
+    // for local zipdb server only
     @Cacheable(cacheNames = "zipcodes", key = "#zipcode", sync = true)
     public List<ZipCodeResponse> getZipData(String zipcode) {
         String normalizedZipcode = "0".repeat(5 - zipcode.length()) + zipcode;

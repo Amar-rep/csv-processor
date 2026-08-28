@@ -43,7 +43,8 @@ public class CsvJobService {
     }
 
     public CsvJob updateStatus(UUID jobId, jobStatus status) {
-        CsvJob job = csvJobRepository.findById(jobId).orElseThrow();
+        CsvJob job = csvJobRepository.findById(jobId)
+                .orElseThrow(() -> new ResourceNotFoundException("csv not found with id"));
         job.setStatus(status);
         if (status == jobStatus.COMPLETED || status == jobStatus.FAILED) {
             job.setCompletedAt(LocalDateTime.now());
