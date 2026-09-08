@@ -13,7 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.example.learn.dto.ZippopotamusResponse;
+import com.example.learn.dto.ZipCodeResponse;
+
 import com.example.learn.entities.Address;
 import com.example.learn.repositories.AddressRepository;
 
@@ -30,7 +31,7 @@ public class AddressServiceTest {
     void getOrCreatedAddress_addressExist_Test() {
         String zipcode = "12344";
         Address ad1 = new Address();
-        ZippopotamusResponse response = new ZippopotamusResponse();
+        ZipCodeResponse response = new ZipCodeResponse();
         when(addressRepository.findByZipCode(zipcode)).thenReturn(Optional.of(ad1));
 
         Address address = addressService.getOrCreateAddressFromZip(zipcode, response);
@@ -43,15 +44,16 @@ public class AddressServiceTest {
     @Test
     void getOrCreatedAddrses_addressNotExist_test() {
         String zipcode = "1234";
-        ZippopotamusResponse.Place place = new ZippopotamusResponse.Place();
 
-        place.setPlaceName("palce name");
-        place.setState("cal");
-
-        ZippopotamusResponse response = new ZippopotamusResponse();
-
+        ZipCodeResponse response = new ZipCodeResponse();
+        ZipCodeResponse.Place place = new ZipCodeResponse.Place();
+        place.setPlaceName("Befef");
+        place.setState("fewf");
+        place.setStateAbbreviation("fwf");
         response.setCountryAbbreviation("US");
-        response.setPlaces(List.of(place));
+        response.setPlaces(List.of(place
+
+        ));
         Address ad1 = new Address();
 
         when(addressRepository.findByZipCode(zipcode)).thenReturn(Optional.empty(), Optional.of(ad1));
