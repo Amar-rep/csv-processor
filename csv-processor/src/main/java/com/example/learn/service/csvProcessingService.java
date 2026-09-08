@@ -25,18 +25,16 @@ import com.example.learn.entities.StatusTracker;
 import com.example.learn.entities.jobStatus;
 import com.example.learn.exceptions.CsvValidationException;
 import com.example.learn.exceptions.FileProcessingException;
-
+import com.example.learn.entities.QueueData;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
 public class csvProcessingService {
 
-    private final UserProcessingService userProcessingService;
-    private final ZipcodeService zipcodeService;
     private final CsvJobService csvJobService;
-    private final FailedRecordService failedRecordService;
     private final CsvValidationService csvValidationService;
+    private final CsvWorkerService csvWorkerService;
 
     private final ExecutorService consumerPool;
     private final ExecutorService producerPool;
@@ -51,6 +49,7 @@ public class csvProcessingService {
             CsvJobService csvJobService,
             FailedRecordService failedRecordService,
             CsvValidationService csvValidationService,
+            CsvWorkerService csvWorkerService,
 
             @Qualifier("csvConsumerExecutor") ExecutorService consumerPool,
 
@@ -58,15 +57,12 @@ public class csvProcessingService {
 
             @Qualifier("csvJobExecutor") ExecutorService jobPool) {
 
-        this.userProcessingService = userProcessingService;
-        this.zipcodeService = zipcodeService;
         this.csvJobService = csvJobService;
-        this.failedRecordService = failedRecordService;
         this.csvValidationService = csvValidationService;
-
         this.consumerPool = consumerPool;
         this.producerPool = producerPool;
         this.jobPool = jobPool;
+        this.csvWorkerService = csvWorkerService;
     }
 
     private static final QueueData POISON = new QueueData(null, -1);
@@ -108,10 +104,11 @@ public class csvProcessingService {
         csvJobService.updateStatus(job.getId(), jobStatus.PROCESSING);
 
         for (int i = 0; i < CONSUMER_COUNT; i++) {
-            Future<?> future = consumerPool.submit(() -> consumer(queue, tracker, job));
+            Future<?> future = consumerPool.submit(() -> csvWorkerService.consumer(queue, tracker, job, POISON));
             consumerFutures.add(future);
         }
-        Future<?> producerFuture = producerPool.submit(() -> produce(job, tempFile, queue, tracker, consumerFutures));
+        Future<?> producerFuture = producerPool
+                .submit(() -> csvWorkerService.producer(job, tempFile, queue, tracker, consumerFutures, POISON));
 
         // Ending the process+cleanUP
         try {
@@ -156,72 +153,7 @@ public class csvProcessingService {
 
     }
 
-    private void produce(CsvJob job, Path tempFile, BlockingQueue<QueueData> queue, StatusTracker tracker,
-            List<Future<?>> consumerFutures) {
-        int rowNumber = 1;
-        try (BufferedReader reader = Files.newBufferedReader(tempFile)) {
-            String line = reader.readLine();
-
-            while ((line = reader.readLine()) != null) {
-                tracker.getTotalRows().incrementAndGet();
-                rowNumber++;
-                queue.put(new QueueData(line, rowNumber));
-                tracker.getProcessedRows().incrementAndGet();
-            }
-
-            sendPoisonPill(queue);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw handleProducerFailure(job, tracker, consumerFutures, "Producer Interrupted", e);
-        } catch (IOException e) {
-            throw handleProducerFailure(job, tracker, consumerFutures, "failed to read csv ", e);
-        }
-    }
-
-    private void consumer(BlockingQueue<QueueData> queue, StatusTracker tracker, CsvJob job) {
-        while (true) {
-            QueueData data = null;
-            try {
-                data = queue.take();
-
-                if (POISON == data) {
-                    break;
-                }
-
-                csvValidationService.validateLine(data.getLine());
-
-                String userData[] = data.getLine().split(",");
-
-                String zipcode = userData[2].trim();
-
-                ZippopotamusResponse response = zipcodeService.getZippopotamusZipData(zipcode);
-                if (response == null || response.getPlaces() == null || response.getPlaces().isEmpty()) {
-                    tracker.getFailedRows().incrementAndGet();
-                    log.warn("ZIP data not found jobId:{} RowNum:{} ZIP:{}", job.getId(), data.getRowNumber(), zipcode);
-                    continue;
-                }
-
-                userProcessingService.createUserFromZippopotamus(userData, response, job);
-                tracker.getSuccesfulRows().incrementAndGet();
-            } catch (CsvValidationException e) {
-                log.warn("Invalid LINE jobId:{} RowNum:{} Message:{}", job.getId(), data.getRowNumber(),
-                        e.getMessage());
-                tracker.getFailedRows().incrementAndGet();
-                failedRecordService.createFailedRecord(job, data.rowNumber, e.getMessage());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new RuntimeException("Consumer shutdown" + job.getId());
-            }
-        }
-    }
-
-    // ------- CLEAN UP HELPERS
-
-    private void sendPoisonPill(BlockingQueue<QueueData> queue) throws InterruptedException {
-        for (int i = 0; i < CONSUMER_COUNT; i++) {
-            queue.put(POISON);
-        }
-    }
+    // clean up functions
 
     private void deleteTempFile(Path tempFile) {
         if (tempFile == null) {
@@ -234,19 +166,6 @@ public class csvProcessingService {
             // write logging
             log.warn("Failed to delete temp file: {}", tempFile, exception);
         }
-    }
-
-    private FileProcessingException handleProducerFailure(CsvJob job, StatusTracker tracker,
-            List<Future<?>> consumerFutures,
-            String message,
-            Exception e) {
-        log.error("CsvProducer Failure : {} for job {}", message, job.getId());
-        tracker.getSuccess().set(false);
-        for (Future<?> ft : consumerFutures) {
-            ft.cancel(true);
-        }
-        return new FileProcessingException(message, e);
-
     }
 
     private void cancelTasks(
@@ -263,24 +182,6 @@ public class csvProcessingService {
             }
         }
         tracker.getSuccess().set(false);
-    }
-
-    private static class QueueData {
-        String line;
-        int rowNumber;
-
-        QueueData(String line, int rowNumber) {
-            this.line = line;
-            this.rowNumber = rowNumber;
-        }
-
-        public String getLine() {
-            return this.line;
-        }
-
-        public int getRowNumber() {
-            return rowNumber;
-        }
     }
 
 }
