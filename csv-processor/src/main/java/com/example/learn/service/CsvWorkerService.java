@@ -2,7 +2,6 @@ package com.example.learn.service;
 
 import java.nio.file.Path;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -11,15 +10,16 @@ import java.nio.file.Files;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
+
 import java.util.concurrent.Future;
 
-import com.example.learn.dto.ZippopotamusResponse;
+import com.example.learn.dto.ZipCodeResponse;
 import com.example.learn.entities.CsvJob;
 import com.example.learn.entities.QueueData;
 import com.example.learn.entities.StatusTracker;
 import com.example.learn.exceptions.CsvValidationException;
 import com.example.learn.exceptions.FileProcessingException;
+import com.example.learn.service.interfaces.ZipCodeService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Value;
 @RequiredArgsConstructor
 public class CsvWorkerService {
 
-    private final ZipcodeService zipcodeService;
+    private final ZipCodeService zipcodeService;
     private final CsvValidationService csvValidationService;
     private final UserProcessingService userProcessingService;
     private final FailedRecordService failedRecordService;
@@ -77,14 +77,14 @@ public class CsvWorkerService {
 
                 String zipcode = userData[2].trim();
 
-                ZippopotamusResponse response = zipcodeService.getZippopotamusZipData(zipcode);
+                ZipCodeResponse response = zipcodeService.getZipData(zipcode);
                 if (response == null || response.getPlaces() == null || response.getPlaces().isEmpty()) {
                     tracker.getFailedRows().incrementAndGet();
                     log.warn("ZIP data not found jobId:{} RowNum:{} ZIP:{}", job.getId(), data.getRowNumber(), zipcode);
                     continue;
                 }
 
-                userProcessingService.createUserFromZippopotamus(userData, response, job);
+                userProcessingService.createUserFromZip(userData, response, job);
                 tracker.getSuccesfulRows().incrementAndGet();
             } catch (CsvValidationException e) {
                 log.warn("Invalid LINE jobId:{} RowNum:{} Message:{}", job.getId(), data.getRowNumber(),

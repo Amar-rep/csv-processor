@@ -11,45 +11,26 @@ import org.springframework.web.reactive.function.client.WebClientRequestExceptio
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.example.learn.dto.ZipCodeResponse;
-import com.example.learn.dto.ZippopotamusResponse;
+
 import com.example.learn.exceptions.ZipLookupException;
+import com.example.learn.service.interfaces.ZipCodeService;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class ZipcodeService {
+public class ZippoService implements ZipCodeService {
     private final WebClient webClient;
 
-    // for local zipdb server only
-    @Cacheable(cacheNames = "zipcodes", key = "#zipcode", sync = true)
-    public List<ZipCodeResponse> getZipData(String zipcode) {
-        String normalizedZipcode = "0".repeat(5 - zipcode.length()) + zipcode;
-
-        try {
-            return webClient.get()
-                    .uri("http://localhost:8080/api/zipcodes/delivery/{zipcode}", normalizedZipcode)
-                    .retrieve()
-                    .bodyToFlux(ZipCodeResponse.class)
-                    .collectList()
-                    .timeout(Duration.ofSeconds(5))
-                    .block();
-        } catch (WebClientResponseException.NotFound exception) {
-            return List.of();
-        } catch (WebClientRequestException | WebClientResponseException exception) {
-            throw new ZipLookupException("ZIP lookup failed for " + normalizedZipcode, exception);
-        }
-    }
-
     @Cacheable(cacheNames = "zippopotamusZipcodes", key = "#zipcode", sync = true)
-    public ZippopotamusResponse getZippopotamusZipData(String zipcode) {
+    public ZipCodeResponse getZipData(String zipcode) {
         String normalizedZipcode = "0".repeat(5 - zipcode.length()) + zipcode;
 
         try {
             return webClient.get()
                     .uri("https://api.zippopotam.us/us/{zipcode}", normalizedZipcode)
                     .retrieve()
-                    .bodyToMono(ZippopotamusResponse.class)
+                    .bodyToMono(ZipCodeResponse.class)
                     .timeout(Duration.ofSeconds(5))
                     .onErrorMap(
                             TimeoutException.class,

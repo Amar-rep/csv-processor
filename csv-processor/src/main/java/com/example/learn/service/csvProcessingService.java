@@ -1,6 +1,5 @@
 package com.example.learn.service;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,11 +18,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.learn.dto.ZippopotamusResponse;
 import com.example.learn.entities.CsvJob;
 import com.example.learn.entities.StatusTracker;
 import com.example.learn.entities.jobStatus;
-import com.example.learn.exceptions.CsvValidationException;
+
 import com.example.learn.exceptions.FileProcessingException;
 import com.example.learn.entities.QueueData;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +43,7 @@ public class csvProcessingService {
 
     public csvProcessingService(
             UserProcessingService userProcessingService,
-            ZipcodeService zipcodeService,
+
             CsvJobService csvJobService,
             FailedRecordService failedRecordService,
             CsvValidationService csvValidationService,
