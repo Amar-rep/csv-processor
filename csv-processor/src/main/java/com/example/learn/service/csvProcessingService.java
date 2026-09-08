@@ -75,6 +75,7 @@ public class csvProcessingService {
     public UUID launchCsvProcessing(MultipartFile file) {
         Path tempFile = null;
         UUID jobId = null;
+        // test
         try {
             csvValidationService.validateFile(file);
             CsvJob job = csvJobService.createJob(file);
@@ -86,9 +87,13 @@ public class csvProcessingService {
             Path fileForProcesssing = tempFile;
             // send for processing to Jobpool
             jobPool.submit(() -> processCsv(fileForProcesssing, job));
-        } catch (IOException e) {
+        } catch (IOException | FileProcessingException e) {
             deleteTempFile(tempFile);
-            csvJobService.updateStatus(jobId, jobStatus.FAILED);
+
+            if (jobId != null) {
+                csvJobService.updateStatus(jobId, jobStatus.FAILED);
+            }
+
             throw new FileProcessingException("Failed to process the uploaded CSV file", e);
         }
 
@@ -110,6 +115,7 @@ public class csvProcessingService {
 
         // Ending the process+cleanUP
         try {
+
             for (Future<?> ft : consumerFutures) {
                 ft.get();
             }
@@ -204,7 +210,7 @@ public class csvProcessingService {
                 failedRecordService.createFailedRecord(job, data.rowNumber, e.getMessage());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                return;
+                throw new RuntimeException("Consumer shutdown" + job.getId());
             }
         }
     }

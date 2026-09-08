@@ -30,7 +30,7 @@ public class AddressService {
                 zipCodeResponse.getPhysicalState());
 
         return addressRepository.findByZipCode(zipCode)
-                .orElseThrow(() -> new IllegalStateException("Address Missing after insert"));
+                .orElseThrow(() -> new IllegalStateException("Address Missing aft insert"));
 
     }
 
